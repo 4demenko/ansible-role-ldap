@@ -1,0 +1,15 @@
+---
+
+- name: Install openldap service package
+  yum:
+    name:
+      - openldap
+      - openldap-servers
+      - openldap-clients
+    state: latest
+
+- name: Start slapd
+  service:
+    name: slapd
+    state: started
+    enabled: yes

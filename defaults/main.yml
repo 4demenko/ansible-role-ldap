@@ -1,0 +1,7 @@
+---
+# defaults file for aliasmee.openldap
+# ref: https://docs.oracle.com/cd/E56344_01/html/E54075/ldapmodify-1.html
+ldap_manager_passwd: 'iamaPassDw24iH'   # ldap super manager passwd (User:Manager)
+ldap_olcsuffix: 'dc=example,dc=com'   # base dn
+ldap_o : 'example com'
+ldap_dc: 'example'

@@ -1,0 +1,8 @@
+---
+# tasks file for aliasmee.openldap
+
+- name: Install openldap
+  include: install_openldap.yml
+
+- name: Config openldap server
+  include: config_openldap.yml

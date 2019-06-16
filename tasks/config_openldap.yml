@@ -1,0 +1,61 @@
+---
+
+- name: Check root passwd exists
+  stat:
+    path: /tmp/ldaprootpasswd.ldif
+  register: rootpasswd_stat_result
+
+- name: Create manager passwd
+  command: slappasswd -h {SSHA} -s {{ ldap_manager_passwd }}
+  register: super_passwd
+
+- name: Copy some ldif to remote server
+  template:
+    src: ldaprootpasswd.ldif.j2
+    dest: /tmp/ldaprootpasswd.ldif
+  when: rootpasswd_stat_result.stat.exists == False
+
+- name: Import ldap root passwd
+  shell: grep olcRootPW /etc/openldap/slapd.d/cn=config/olcDatabase={*}config.ldif || ldapadd -Y EXTERNAL -H ldapi:/// -f /tmp/ldaprootpasswd.ldif 
+- name: Configure ldap database
+  copy:
+    remote_src: yes
+    src: /usr/share/openldap-servers/DB_CONFIG.example
+    dest: /var/lib/ldap/DB_CONFIG
+    owner: ldap
+    group: ldap
+    force: no
+  notify: "Restart slpad"
+
+- name: Import cosine schema
+  command: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
+  args:
+    creates: "/etc/openldap/slapd.d/cn=config/cn=schema/cn={*}cosine.ldif"
+
+- name: Import nis schema
+  command: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
+  args:
+    creates: "/etc/openldap/slapd.d/cn=config/cn=schema/cn={*}nis.ldif"
+
+- name: Import inetorgperson schema
+  command: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+  args:
+    creates: "/etc/openldap/slapd.d/cn=config/cn=schema/cn={*}inetorgperson.ldif"
+
+- name: Copy ldapdomain ldif
+  template:
+    src: ldapdomain.ldif.j2
+    dest: /tmp/ldapdomain.ldif
+
+- name: Import ldap domain ldif
+  shell: grep {{ ldap_olcsuffix }} /etc/openldap/slapd.d/cn=config/olcDatabase={1}monitor.ldif || grep {{ ldap_olcsuffix }} /etc/openldap/slapd.d/cn=config/olcDatabase={2}hdb.ldif || ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/ldapdomain.ldif
+
+- name: Copy ldap base domain ldif
+  template:
+    src: baseldapdomain.ldif.j2
+    dest: /tmp/baseldapdomain.ldif
+
+- name: Import ldap base domain
+  shell: ldapadd -x -D "cn=Manager,{{ ldap_olcsuffix }}" -w {{ ldap_manager_passwd }} -f /tmp/baseldapdomain.ldif && touch {{ openldap_server_app_path }}/rootdn_created
+  args:
+    creates: "{{ openldap_server_app_path }}/rootdn_created"
