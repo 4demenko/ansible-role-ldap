@@ -8,5 +8,3 @@ Forked by https://github.com/aliasmee/ansible-role-openldap
 To Do:
 - Encrypt connection
 - use ldap_attr insted raw shell commands
-
-Markdown test
