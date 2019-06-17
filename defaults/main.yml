@@ -1,4 +1,5 @@
 ---
+ldap_admin_user: 'cn=admin'
 ldap_manager_passwd: 'iamaPassDw24iH'   # ldap super manager passwd (User:admin)
 ldap_olcsuffix: 'dc=example,dc=com'   # base dn
 ldap_o : 'example com'
