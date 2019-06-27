@@ -59,3 +59,15 @@
   shell: ldapadd -x -D "cn=admin,{{ ldap_olcsuffix }}" -w {{ ldap_manager_passwd }} -f /tmp/baseldapdomain.ldif && touch {{ openldap_server_app_path }}/rootdn_created
   args:
     creates: "{{ openldap_server_app_path }}/rootdn_created"
+
+- name: Find files /tmp/*.ldif 
+  find:
+    paths: /tmp
+    patterns: "*.ldif"
+  register: list_tmp_files
+
+- name: Delete unused files from /tmp
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ list_tmp_files.files }}"

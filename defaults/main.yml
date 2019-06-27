@@ -1,6 +1,6 @@
 ---
-ldap_admin_user: 'cn=admin'
-ldap_manager_passwd: 'iamaPassDw24iH'   # ldap super manager passwd (User:admin)
-ldap_olcsuffix: 'dc=example,dc=com'   # base dn
-ldap_o : 'example com'
-ldap_dc: 'example'
+ldap_admin_user: 'cn=admin'                       # username account of ldap admin. The var can be overriden
+ldap_manager_passwd: 'ThePassWordOfLdapAdmin11'   # ldap super manager passwd (User:admin)
+ldap_olcsuffix: 'dc=lab,dc=example,dc=com'        # base dn
+ldap_o : 'lab example com'
+ldap_dc: 'lab'
