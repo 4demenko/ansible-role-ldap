@@ -1,5 +1,4 @@
 ---
-
 - name: Check root passwd exists
   stat:
     path: /tmp/ldaprootpasswd.ldif
@@ -25,7 +24,7 @@
     owner: ldap
     group: ldap
     force: no
-  notify: "Restart slpad"
+  notify: "Restart slapd"
 
 - name: Import cosine schema
   command: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
@@ -42,13 +41,32 @@
   args:
     creates: "/etc/openldap/slapd.d/cn=config/cn=schema/cn={*}inetorgperson.ldif"
 
-- name: Copy ldapdomain ldif
+- name: Copy ldapdomain.ldif
   template:
     src: ldapdomain.ldif.j2
     dest: /tmp/ldapdomain.ldif
 
 - name: Import ldap domain ldif
   shell: grep {{ ldap_olcsuffix }} /etc/openldap/slapd.d/cn=config/olcDatabase={1}monitor.ldif || grep {{ ldap_olcsuffix }} /etc/openldap/slapd.d/cn=config/olcDatabase={2}hdb.ldif || ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/ldapdomain.ldif
+
+- name: Add certificates paths in /etc/sysconfig/slapd
+  blockinfile:
+    path: /etc/sysconfig/slapd
+    insertafter: '^#SLAPD_OPTIONS=""'
+    block: |
+      TLSCACertificateFile /etc/letsencrypt/live/{{ inventory_hostname }}/chain.pem
+      TLSCertificateFile /etc/letsencrypt/live/{{ inventory_hostname }}/cert.pem
+      TLSCertificateKeyFile /etc/letsencrypt/live/{{ inventory_hostname }}/privkey.pem 
+  when: ldap_enable_tls | bool
+
+- name: Enable ldaps in /etc/sysconfig/slapd
+  lineinfile:
+    dest: /etc/sysconfig/slapd
+    regexp: SLAPD_URLS="ldapi:/// ldap:///"
+    line: SLAPD_URLS="ldapi:/// ldap:/// ldaps:///"
+    backrefs: yes
+  when: ldap_enable_tls | bool
+  notify: Restart slapd
 
 - name: Copy ldap base domain ldif
   template:
@@ -60,14 +78,26 @@
   args:
     creates: "{{ openldap_server_app_path }}/rootdn_created"
 
+- name: Copy populate.ldif
+  template:
+    src: populate.ldif.j2
+    dest: /tmp/populate.ldif
+  when: ldap_populate | bool
+
+- name: populating openLDAP
+  shell: ldapadd -x -D "cn=admin,{{ ldap_olcsuffix }}" -w {{ ldap_manager_passwd }} -f /tmp/populate.ldif
+  ignore_errors: yes  #set to get around erroring out that items already exist
+  when: ldap_populate | bool
+
 - name: Find files /tmp/*.ldif 
   find:
     paths: /tmp
     patterns: "*.ldif"
   register: list_tmp_files
 
-- name: Delete unused files from /tmp
-  file:
-    path: "{{ item.path }}"
-    state: absent
-  with_items: "{{ list_tmp_files.files }}"
+#- name: Delete unused files from /tmp
+#  file:
+#    path: "{{ item.path }}"
+#    state: absent
+#  with_items: "{{ list_tmp_files.files }}"
+...

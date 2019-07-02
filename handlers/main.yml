@@ -2,12 +2,12 @@
 # handlers file for aliasmee.openldap
 
 - name: Start slapd
-  service:
+  systemd:
     name: slapd
     state: started
     enabled: yes
 
-- name: Restart slpad
-  service:
+- name: Restart slapd
+  systemd:
     name: slapd
     state: restarted

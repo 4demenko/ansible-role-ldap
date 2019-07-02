@@ -5,3 +5,9 @@ objectclass: organization
 o: {{ ldap_o }}
 dc: {{ ldap_dc }}
 
+dn: cn={{ ldap_admin_user }},{{ ldap_olcsuffix }}
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: {{ ldap_admin_user }}
+description: LDAP administrator
+userPassword: {{ super_passwd.stdout }}

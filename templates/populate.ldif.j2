@@ -1,0 +1,35 @@
+{% for item in ldap_organizationalunits %}
+dn: ou={{ item }},{{ ldap_olcsuffix }}
+objectClass: top
+objectClass: organizationalUnit
+
+{% endfor %}
+
+{% for item in ldap_posixgroups %}
+dn: cn={{ item.name }},ou={{ item.ou }},{{ ldap_olcsuffix }}
+objectClass: posixGroup
+objectClass: top
+cn: {{ item.name }}
+gidNumber: {{ item.gidNum }}
+
+{% endfor %}
+
+{% for item in ldap_users %}
+dn: uid={{ item.FirstName|lower }},ou={{ item.ou }},{{ ldap_olcsuffix }}
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: {{ item.FirstName|lower }}
+sn: {{ item.LastName }}
+givenName: {{ item.FirstName }}
+cn: {{ item.FirstName }} {{ item.LastName }}
+displayName: {{ item.FirstName }} {{ item.LastName }}
+uidNumber: {{ item.uidNum }}
+gidNumber: {{ item.gidNum }}
+userPassword: {{ item.password }}
+gecos: {{ item.FirstName }} {{ item.LastName }}
+loginShell: {{ item.loginShell }}
+homeDirectory: {{ item.homeDirectory }}
+
+
+{% endfor %}

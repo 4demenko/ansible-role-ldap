@@ -1,5 +1,4 @@
 ---
-
 - name: Install openldap service package
   yum:
     name:
@@ -13,3 +12,4 @@
     name: slapd
     state: started
     enabled: yes
+...

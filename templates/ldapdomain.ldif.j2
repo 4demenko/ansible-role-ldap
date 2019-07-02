@@ -2,7 +2,7 @@ dn: olcDatabase={1}monitor,cn=config
 changetype: modify
 replace: olcAccess
 olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth"
-  read by dn.base="{{ ldap_admin_user }},{{ ldap_olcsuffix }}" read by * none
+  read by dn.base="cn={{ ldap_admin_user }},{{ ldap_olcsuffix }}" read by * none
 
 dn: olcDatabase={2}hdb,cn=config
 changetype: modify
@@ -12,7 +12,7 @@ olcSuffix: {{ ldap_olcsuffix }}
 dn: olcDatabase={2}hdb,cn=config
 changetype: modify
 replace: olcRootDN
-olcRootDN: {{ ldap_admin_user }},{{ ldap_olcsuffix }}
+olcRootDN: cn={{ ldap_admin_user }},{{ ldap_olcsuffix }}
 
 dn: olcDatabase={2}hdb,cn=config
 changetype: modify
@@ -23,6 +23,6 @@ dn: olcDatabase={2}hdb,cn=config
 changetype: modify
 add: olcAccess
 olcAccess: {0}to attrs=userPassword,shadowLastChange by
-  dn="{{ ldap_admin_user }},{{ ldap_olcsuffix }}" write by anonymous auth by self write by * none
+  dn="cn={{ ldap_admin_user }},{{ ldap_olcsuffix }}" write by anonymous auth by self write by * none
 olcAccess: {1}to dn.base="" by * read
-olcAccess: {2}to * by dn="{{ ldap_admin_user }},{{ ldap_olcsuffix }}" write by * read
+olcAccess: {2}to * by dn="cn={{ ldap_admin_user }},{{ ldap_olcsuffix }}" write by * read
