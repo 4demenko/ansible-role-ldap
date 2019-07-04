@@ -15,19 +15,16 @@ gidNumber: {{ item.gidNum }}
 {% endfor %}
 
 {% for item in ldap_users %}
-dn: uid={{ item.FirstName|lower }},ou={{ item.ou }},{{ ldap_olcsuffix }}
+dn: cn={{ item.UserName|lower }},ou={{ item.ou }},{{ ldap_olcsuffix }}
 objectClass: inetOrgPerson
 objectClass: posixAccount
-objectClass: shadowAccount
-uid: {{ item.FirstName|lower }}
+objectClass: top
+uid: {{ item.UserName|lower }}
 sn: {{ item.LastName }}
 givenName: {{ item.FirstName }}
-cn: {{ item.FirstName }} {{ item.LastName }}
-displayName: {{ item.FirstName }} {{ item.LastName }}
 uidNumber: {{ item.uidNum }}
 gidNumber: {{ item.gidNum }}
 userPassword: {{ item.password }}
-gecos: {{ item.FirstName }} {{ item.LastName }}
 loginShell: {{ item.loginShell }}
 homeDirectory: {{ item.homeDirectory }}
 

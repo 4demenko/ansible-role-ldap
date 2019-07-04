@@ -95,9 +95,9 @@
     patterns: "*.ldif"
   register: list_tmp_files
 
-#- name: Delete unused files from /tmp
-#  file:
-#    path: "{{ item.path }}"
-#    state: absent
-#  with_items: "{{ list_tmp_files.files }}"
+- name: Delete unused files from /tmp
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ list_tmp_files.files }}"
 ...

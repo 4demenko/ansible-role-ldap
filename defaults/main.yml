@@ -1,5 +1,5 @@
 ---
-ldap_admin_user: 'cn=admin'                       # username account of ldap admin. The var can be overriden
+ldap_admin_user: 'admin'                          # username account of ldap admin. The var can be overriden
 ldap_manager_passwd: 'ThePassWordOfLdapAdmin11'   # ldap super manager passwd (User:admin)
 ldap_olcsuffix: 'dc=lab,dc=example,dc=com'        # base dn
 ldap_o: 'lab.example.com'
@@ -12,25 +12,28 @@ ldap_organizationalunits:   #defines OU's to populate
   - sys
   - devops
   - developers
+
 ldap_posixgroups:           #defines groups to create within OU's
   - name: all-users
     ou: sys
-    gidNum: 2000            #start group numbers at 5000 and up
+    gidNum: 500            #start group numbers at 5000 and up
 
   - name: devops-users
     ou: devops
-    gidNum: 2001         
+    gidNum: 501         
 
   - name: dev-users
     ou: developers
-    gidNum: 2002   
+    gidNum: 502   
 
 ldap_users:
-  - FirstName: John
+  - UserName: j.smith
+    FirstName: John
     LastName: Smith
-    ou: sys                    #defines OU name
-    uidNum: 3000               #start user numbers at 2000 and up
-    gidNum: 2003               #defines gidNum from openldap_posixgroups
-    password: 'MinePassJohn'
+    ou: sys                                          #defines OU name
+    uidNum: 1000                                     #start user numbers at 2000 and up
+    gidNum: 500                                      #defines gidNum from openldap_posixgroup all-users
+    password: '{SSHA}rIIuqRXbXKvun3XHrCB7pWQ3QaftIEsM' # or just put clear pass 'MinePassJohn'
     loginShell: /bin/bash
-    homeDirectory: /home/users/john
+    homeDirectory: /home/users/j.smith
+...
