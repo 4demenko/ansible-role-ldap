@@ -4,10 +4,17 @@ ldap_manager_passwd: 'ThePassWordOfLdapAdmin11'   # ldap super manager passwd (U
 ldap_olcsuffix: 'dc=lab,dc=example,dc=com'        # base dn
 ldap_o: 'lab.example.com'
 ldap_dc: 'lab'
-ldap_enable_tls: false
+ldap_enable_tls: true
+ldap_cert_dir_path: '/etc/letsencrypt'
+ldap_cacert_file_path: '{{ ldap_cert_dir_path }}/live/{{ inventory_hostname }}/chain.pem'
+ldap_cert_file_path: '{{ ldap_cert_dir_path }}/live/{{ inventory_hostname }}/cert.pem'
+ldap_privkey_file_path: '{{ ldap_cert_dir_path }}/live/{{ inventory_hostname }}/privkey.pem'
 
+# disable read only anonymouse user
+ldap_disable_bind_anon: true
 
-ldap_populate: false        #defines if openldap DB should be populated with openldap_organizationalunits, openldap_posixgroups and openldap_users
+#defines if openldap DB should be populated with openldap_organizationalunits, openldap_posixgroups and openldap_users
+ldap_populate: true        
 ldap_organizationalunits:   #defines OU's to populate
   - sys
   - devops
@@ -36,4 +43,9 @@ ldap_users:
     password: '{SSHA}rIIuqRXbXKvun3XHrCB7pWQ3QaftIEsM' # or just put clear pass 'MinePassJohn'
     loginShell: /bin/bash
     homeDirectory: /home/users/j.smith
+
+ldap_security_users:                                 # The user for external connect to LDAP
+  - UserName: security.user
+    ou: sys                                          #defines OU name
+    password: '{SSHA}rIIuqRXbXKvun3XHrCB7pWQ3QaftIEsM' # or just put clear pass 'MinePassJohn'
 ...

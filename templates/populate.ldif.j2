@@ -28,5 +28,13 @@ userPassword: {{ item.password }}
 loginShell: {{ item.loginShell }}
 homeDirectory: {{ item.homeDirectory }}
 
+{% endfor %}
+
+{% for item in ldap_security_users %}
+dn: cn={{ item.UserName|lower }},ou={{ item.ou }},{{ ldap_olcsuffix }}
+objectclass: simpleSecurityObject
+objectclass: organizationalRole
+objectclass: top
+userPassword: {{ item.password }}
 
 {% endfor %}

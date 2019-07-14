@@ -1,0 +1,12 @@
+dn: cn=config
+replace: olcTLSCACertificatePath
+olcTLSCACertificatePath: {{ ldap_cert_dir_path }}
+-
+replace: olcTLSCACertificateFile
+olcTLSCACertificateFile: {{ ldap_cacert_file_path }}
+-
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: {{ ldap_cert_file_path }}
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: {{ ldap_privkey_file_path }}

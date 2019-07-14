@@ -8,7 +8,13 @@
   command: slappasswd -h {SSHA} -s {{ ldap_manager_passwd }}
   register: super_passwd
 
-- name: Copy some ldif to remote server
+- name: Copy disablebindanon.ldif to remote server
+  template:
+    src: disablebindanon.ldif.j2
+    dest: /tmp/disablebindanon.ldif
+  when: ldap_disable_bind_anon | bool
+
+- name: Copy ldaprootpasswd.ldif to remote server
   template:
     src: ldaprootpasswd.ldif.j2
     dest: /tmp/ldaprootpasswd.ldif
@@ -46,18 +52,14 @@
     src: ldapdomain.ldif.j2
     dest: /tmp/ldapdomain.ldif
 
+- name: Copy tls.ldif
+  template:
+    src: tls.ldif.j2
+    dest: /tmp/tls.ldif
+  when: ldap_enable_tls | bool
+
 - name: Import ldap domain ldif
   shell: grep {{ ldap_olcsuffix }} /etc/openldap/slapd.d/cn=config/olcDatabase={1}monitor.ldif || grep {{ ldap_olcsuffix }} /etc/openldap/slapd.d/cn=config/olcDatabase={2}hdb.ldif || ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/ldapdomain.ldif
-
-- name: Add certificates paths in /etc/sysconfig/slapd
-  blockinfile:
-    path: /etc/sysconfig/slapd
-    insertafter: '^#SLAPD_OPTIONS=""'
-    block: |
-      TLSCACertificateFile /etc/letsencrypt/live/{{ inventory_hostname }}/chain.pem
-      TLSCertificateFile /etc/letsencrypt/live/{{ inventory_hostname }}/cert.pem
-      TLSCertificateKeyFile /etc/letsencrypt/live/{{ inventory_hostname }}/privkey.pem 
-  when: ldap_enable_tls | bool
 
 - name: Enable ldaps in /etc/sysconfig/slapd
   lineinfile:
@@ -67,6 +69,19 @@
     backrefs: yes
   when: ldap_enable_tls | bool
   notify: Restart slapd
+
+- name: Recursively change ownership of certfile directory
+  file:
+    path: "{{ ldap_cert_dir_path }}"
+    state: directory
+    recurse: yes
+    owner: ldap
+    group: ldap
+  when: ldap_enable_tls | bool
+
+- name: Import tls.ldif settings
+  shell: grep olcTLSCACertificateFile /etc/openldap/slapd.d/cn=config.ldif || ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/tls.ldif
+  when: ldap_enable_tls | bool
 
 - name: Copy ldap base domain ldif
   template:
@@ -88,6 +103,10 @@
   shell: ldapadd -x -D "cn=admin,{{ ldap_olcsuffix }}" -w {{ ldap_manager_passwd }} -f /tmp/populate.ldif
   ignore_errors: yes  #set to get around erroring out that items already exist
   when: ldap_populate | bool
+
+- name: disable bind anonymous
+  shell: grep olcRequires /etc/openldap/slapd.d/cn=config/olcDatabase={-1}frontend.ldif || ldapadd -Y EXTERNAL -H ldapi:/// -f /tmp/disablebindanon.ldif
+  when: ldap_disable_bind_anon | bool
 
 - name: Find files /tmp/*.ldif 
   find:
